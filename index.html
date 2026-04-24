@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sơ đồ giải đấu cầu lông</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+  <!-- HEADER -->
+  <header class="bg-slate-800 text-white">
+    <div class="max-w-screen-2xl mx-auto px-6 py-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div>
+        <h1 class="text-2xl font-bold tracking-wide">SƠ ĐỒ GIẢI ĐẤU CẦU LÔNG</h1>
+        <p class="text-slate-300 text-sm mt-1">Thể thức loại trực tiếp · Có cơ chế hồi sinh sau Vòng 1</p>
+        <p class="text-slate-400 text-xs mt-0.5">3 nội dung thi đấu · Cơ cấu bảng đấu tùy theo số lượng cặp</p>
+      </div>
+      <div class="flex flex-wrap gap-2" data-hide-on-export>
+        <button id="btn-save" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-1.5">
+          <span>💾</span> Lưu thay đổi
+        </button>
+        <button id="btn-reset" class="bg-slate-600 hover:bg-slate-700 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-1.5">
+          <span>↻</span> Đặt lại
+        </button>
+        <button id="btn-export" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-md text-sm font-medium flex items-center gap-1.5">
+          <span>🖼</span> Xuất hình ảnh
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-screen-2xl mx-auto px-6 py-6">
+
+    <!-- EVENT TABS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5" data-hide-on-export id="event-tabs">
+      <button data-tab="doi-nam" class="event-tab border-2 rounded-lg p-4 text-left transition-all" data-color="blue">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-blue-500 text-white font-bold flex items-center justify-center">1</div>
+          <div>
+            <div class="font-bold text-slate-800">NỘI DUNG: Đôi nam</div>
+            <div class="text-xs text-slate-500">6 cặp thi đấu (12 VĐV)</div>
+            <div class="text-xs text-slate-500 italic">Dùng Bảng A</div>
+          </div>
+        </div>
+      </button>
+      <button data-tab="doi-nu" class="event-tab border-2 rounded-lg p-4 text-left transition-all" data-color="rose">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-rose-500 text-white font-bold flex items-center justify-center">2</div>
+          <div>
+            <div class="font-bold text-slate-800">NỘI DUNG: Đôi nữ</div>
+            <div class="text-xs text-slate-500">6 cặp thi đấu (12 VĐV)</div>
+            <div class="text-xs text-slate-500 italic">Dùng Bảng A</div>
+          </div>
+        </div>
+      </button>
+      <button data-tab="doi-nam-nu" class="event-tab border-2 rounded-lg p-4 text-left transition-all" data-color="violet">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-full bg-violet-500 text-white font-bold flex items-center justify-center">3</div>
+          <div>
+            <div class="font-bold text-slate-800">NỘI DUNG: Đôi nam nữ</div>
+            <div class="text-xs text-slate-500">12 cặp thi đấu (24 VĐV)</div>
+            <div class="text-xs text-slate-500 italic">Dùng Bảng B</div>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <!-- MODE TOGGLE -->
+    <div class="flex items-center gap-3 mb-4 text-sm" data-hide-on-export>
+      <span class="text-slate-600 font-medium">Chế độ:</span>
+      <div class="inline-flex rounded-md border border-slate-300 bg-white overflow-hidden">
+        <button id="mode-preview" class="mode-btn px-4 py-1.5 font-medium transition-colors">Xem trước</button>
+        <button id="mode-edit" class="mode-btn px-4 py-1.5 font-medium transition-colors border-l border-slate-300">Nhập kết quả</button>
+      </div>
+      <span id="mode-hint" class="text-slate-500 text-xs"></span>
+    </div>
+
+    <!-- BRACKET AREA -->
+    <section id="bracket-area" class="bg-white border border-slate-200 rounded-lg overflow-x-auto">
+      <!-- Rendered by JS -->
+    </section>
+
+    <!-- PLAYER LIST -->
+    <section id="player-list" class="bg-slate-50 border border-slate-200 rounded-lg mt-4 p-4" data-hide-on-export>
+      <!-- Rendered by JS -->
+    </section>
+
+    <!-- JSON IMPORT/EXPORT -->
+    <div class="flex flex-wrap gap-2 mt-3 text-xs" data-hide-on-export>
+      <button id="btn-import-json" class="border border-slate-300 bg-white hover:bg-slate-100 px-3 py-1.5 rounded">📥 Import JSON</button>
+      <button id="btn-export-json" class="border border-slate-300 bg-white hover:bg-slate-100 px-3 py-1.5 rounded">📤 Export JSON</button>
+      <input type="file" id="file-input" hidden accept=".json,application/json">
+      <span class="text-slate-400 italic ml-2 self-center">Thay đổi tên người chơi sẽ tự động cập nhật sơ đồ</span>
+    </div>
+
+  </main>
+
+  <!-- TOAST -->
+  <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 text-white px-4 py-2 rounded-md shadow-lg text-sm opacity-0 pointer-events-none transition-opacity duration-200 z-50"></div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirm-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" data-hide-on-export>
+    <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 p-5">
+      <h3 class="font-bold text-slate-800 mb-2" id="confirm-title">Xác nhận</h3>
+      <p class="text-slate-600 text-sm mb-4" id="confirm-message">Bạn có chắc không?</p>
+      <div class="flex justify-end gap-2">
+        <button id="confirm-cancel" class="px-3 py-1.5 text-sm rounded border border-slate-300 hover:bg-slate-100">Hủy</button>
+        <button id="confirm-ok" class="px-3 py-1.5 text-sm rounded bg-rose-500 text-white hover:bg-rose-600">Xóa</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

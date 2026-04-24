@@ -1,0 +1,479 @@
+/* Base */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+}
+
+/* Event tabs */
+.event-tab {
+  background: white;
+  border-color: #e2e8f0;
+  cursor: pointer;
+}
+.event-tab:hover {
+  border-color: #cbd5e1;
+}
+.event-tab.active[data-color="blue"]   { background: #eff6ff; border-color: #3b82f6; }
+.event-tab.active[data-color="rose"]   { background: #fff1f2; border-color: #f43f5e; }
+.event-tab.active[data-color="violet"] { background: #f5f3ff; border-color: #8b5cf6; }
+
+/* Mode buttons */
+.mode-btn {
+  color: #475569;
+  background: white;
+}
+.mode-btn.active {
+  background: #1e293b;
+  color: white;
+}
+
+/* ==== BRACKET ==== */
+.bracket-wrap {
+  padding: 1.25rem 1.5rem 1.5rem;
+  min-width: min-content;
+}
+
+.bracket-export-title {
+  text-align: center;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-radius: 8px;
+  color: white;
+}
+.bracket-export-title .bet-main {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+.bracket-export-title .bet-event {
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  margin-top: 0.1rem;
+}
+.bracket-export-title .bet-event.blue   { color: #93c5fd; }
+.bracket-export-title .bet-event.rose   { color: #fda4af; }
+.bracket-export-title .bet-event.violet { color: #c4b5fd; }
+
+.bracket-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1d4ed8;
+  color: white;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+.bracket-header.bracket-b-header { background: #6d28d9; }
+
+.round-labels {
+  display: grid;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.round-label {
+  text-align: center;
+  font-weight: 700;
+  color: #334155;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+}
+.round-label.r1 { background: #dbeafe; color: #1e40af; }
+.round-label.r2 { background: #dcfce7; color: #166534; }
+.round-label.r3 { background: #ede9fe; color: #6d28d9; }
+.round-label.r4 { background: #fce7f3; color: #9d174d; }
+
+.bracket-grid {
+  display: grid;
+  gap: 0.5rem 1.75rem;
+  align-items: stretch;
+}
+.bracket-a .bracket-grid {
+  grid-template-rows: repeat(4, minmax(160px, 1fr));
+  min-height: 640px;
+}
+.bracket-b .bracket-grid {
+  grid-template-rows: repeat(7, minmax(92px, 1fr));
+  min-height: 700px;
+}
+
+/* Grid item wrapper — holds a single slot card / match-group, centered in its row span */
+.bg-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  min-height: 0;
+}
+
+
+/* Pair cards */
+.pair-card {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  position: relative;
+  transition: all 0.15s;
+}
+.pair-card .pair-label {
+  font-weight: 700;
+  color: #1e40af;
+  font-size: 0.8rem;
+}
+.pair-card .pair-players {
+  font-size: 0.78rem;
+  color: #0f172a;
+  line-height: 1.4;
+  font-weight: 600;
+}
+.pair-card .pair-players div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.pair-card.compact {
+  padding: 0.4rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pair-card.compact .pair-label { font-size: 0.78rem; flex: 0 0 auto; }
+.pair-card.compact .pair-players {
+  font-size: 0.72rem;
+  color: #0f172a;
+  font-weight: 600;
+  line-height: 1.35;
+  flex: 1;
+  text-align: center;
+}
+
+/* Winner highlight */
+.pair-card.winner {
+  background: #dcfce7 !important;
+  border-color: #16a34a !important;
+  box-shadow: 0 0 0 2px rgba(22,163,74,0.15);
+}
+.pair-card.winner .pair-label { color: #166534 !important; }
+.pair-card.loser,
+.slot-card.loser {
+  opacity: 0.45;
+  filter: grayscale(0.3);
+}
+
+/* Allow content to escape for badges and SVG connectors */
+.match-group, .pair-card, .slot-card, .bg-item { overflow: visible; }
+
+/* SVG connector overlay */
+.bracket-grid { position: relative; }
+.connectors-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+.connector-path { fill: none; }
+.connector-path.loser { stroke: #cbd5e1; stroke-width: 1.5; }
+.connector-path.winner { stroke: #16a34a; stroke-width: 2; }
+
+/* Cards above SVG so they stay clickable */
+.pair-card, .slot-card, .revival-card, .champion-card { position: relative; z-index: 1; }
+
+/* Clickable in edit mode */
+body.mode-edit .pair-card.clickable {
+  cursor: pointer;
+}
+body.mode-edit .pair-card.clickable:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+}
+
+/* Match group (pair of cards with "vs") */
+.match-group {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  position: relative;
+}
+.match-group.with-title { margin-top: 0.25rem; }
+.match-group .match-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.15rem;
+}
+.match-group .vs-label {
+  text-align: center;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 600;
+  padding: 0.05rem 0;
+}
+
+/* Win badge placed inside the winner card, top-right corner */
+.win-badge {
+  position: absolute;
+  right: -6px;
+  top: -8px;
+  background: #16a34a;
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 4px 2px 6px;
+  border-radius: 3px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  letter-spacing: 0.05em;
+}
+.win-badge .win-clear {
+  background: rgba(255,255,255,0.25);
+  color: white;
+  border: none;
+  border-radius: 2px;
+  width: 14px;
+  height: 14px;
+  line-height: 1;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.win-badge .win-clear:hover {
+  background: #dc2626;
+}
+body.mode-preview .win-badge .win-clear { display: none; }
+
+/* Slot cards (semifinal/final placeholders) */
+.slot-card {
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: #166534;
+  position: relative;
+}
+body.mode-edit .slot-card.clickable { cursor: pointer; }
+body.mode-edit .slot-card.clickable:hover {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 2px rgba(22,163,74,0.15);
+}
+.slot-card .slot-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.slot-card .slot-sub {
+  font-size: 0.7rem;
+  opacity: 0.85;
+}
+.slot-card.final {
+  background: #ede9fe;
+  border-color: #c4b5fd;
+  color: #6d28d9;
+}
+.slot-card.filled {
+  background: white;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+/* Revival slot */
+.revival-card {
+  background: #fef3c7;
+  border: 2px dashed #f59e0b;
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: #92400e;
+}
+.revival-card .rev-title {
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+.revival-card .rev-sub {
+  font-size: 0.7rem;
+}
+.revival-card select {
+  margin-top: 0.4rem;
+  width: 100%;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid #f59e0b;
+  background: white;
+}
+.revival-card.filled {
+  background: white;
+  border-style: solid;
+  color: #92400e;
+}
+
+/* Champion card */
+.champion-card {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #f59e0b;
+  border-radius: 8px;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  color: #78350f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 140px;
+  justify-content: center;
+}
+.champion-card .trophy {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+.champion-card .champ-label {
+  background: #ef4444;
+  color: white;
+  padding: 0.15rem 0.55rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.champion-card .champ-title {
+  font-weight: 800;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.champion-card .champ-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: white;
+  border-radius: 4px;
+  min-height: 1.5rem;
+  min-width: 6rem;
+}
+
+/* Mechanism info box */
+.mechanism-box {
+  background: #fffbeb;
+  border: 1px dashed #f59e0b;
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  color: #92400e;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+.mechanism-box .mech-title {
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  font-size: 0.78rem;
+}
+
+/* Connector (simple horizontal line from right edge) */
+.connector {
+  position: absolute;
+  top: 50%;
+  right: -1.25rem;
+  width: 1.25rem;
+  height: 1px;
+  background: #cbd5e1;
+}
+
+/* Player list */
+.player-list-title {
+  font-weight: 700;
+  color: #334155;
+  text-align: center;
+  margin-bottom: 0.85rem;
+  letter-spacing: 0.02em;
+}
+.player-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
+  gap: 0.5rem 1rem;
+}
+.player-row {
+  display: grid;
+  grid-template-columns: 65px 70px 1fr 70px 1fr;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.4rem 0.5rem;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.player-row .pair-chip {
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.25rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.player-row label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.player-row input {
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.82rem;
+  width: 100%;
+  background: white;
+}
+.player-row input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.15);
+}
+
+/* Bảng A grid: 4 columns (V1, V2 BK, V3 Final, Champion) */
+.bracket-a .bracket-grid,
+.bracket-a .round-labels {
+  grid-template-columns: 1.15fr 1.25fr 1fr 0.9fr;
+}
+
+/* Bảng B grid: 5 columns (V1, V2 TK, V3 BK, V4 Final, Champion) */
+.bracket-b .bracket-grid,
+.bracket-b .round-labels {
+  grid-template-columns: 0.9fr 1fr 1.1fr 1.1fr 0.9fr;
+}
+
+.round-labels { gap: 0 1.75rem; margin-bottom: 0.5rem; }
+
+/* Toast */
+#toast.show { opacity: 1; }
+
+/* Export mode: remove page background effects */
+body.exporting #bracket-area {
+  box-shadow: none;
+  border-color: #e2e8f0;
+}
+/* Export mode: show full names, no ellipsis */
+body.exporting .pair-card .pair-players div,
+body.exporting .slot-card .slot-title,
+body.exporting .slot-card .slot-sub {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* Responsive: keep bracket scrollable */
+#bracket-area {
+  min-height: 200px;
+}
