@@ -382,6 +382,77 @@ body.mode-edit .slot-card.clickable:hover {
   font-size: 0.78rem;
 }
 
+/* Per-game score entry */
+.score-games-wrap {
+  margin-top: 0.3rem;
+  padding: 0.3rem 0.4rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+.score-game-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+.game-num {
+  font-size: 0.65rem;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 34px;
+}
+.score-sep { color: #94a3b8; font-weight: 700; font-size: 0.75rem; }
+.score-input {
+  width: 38px;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  padding: 0.15rem 0.2rem;
+  font-size: 0.72rem;
+  text-align: center;
+  background: white;
+  -moz-appearance: textfield;
+}
+.score-input::-webkit-inner-spin-button,
+.score-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.score-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 1px rgba(59,130,246,0.2); }
+.game-win-ind { font-size: 0.68rem; font-weight: 700; }
+.game-win-a { color: #1d4ed8; }
+.game-win-b { color: #9333ea; }
+.score-summary {
+  margin-top: 0.25rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.67rem;
+  color: #166534;
+  font-weight: 700;
+}
+
+/* Revival ranking table */
+.revival-ranking { margin-top: 0.4rem; border-top: 1px dashed #fcd34d; padding-top: 0.35rem; }
+.revival-rank-header { font-size: 0.65rem; color: #78350f; font-weight: 700; margin-bottom: 0.3rem; }
+.revival-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.3rem;
+  border-radius: 3px;
+  font-size: 0.67rem;
+  margin-bottom: 0.15rem;
+  background: rgba(255,255,255,0.5);
+}
+.revival-rank-row.top  { background: #fef9c3; border: 1px solid #fde047; }
+.revival-rank-row.tie  { background: #fce7f3; border: 1px solid #f9a8d4; }
+.rank-badge { font-size: 0.72rem; font-weight: 700; min-width: 16px; text-align: center; }
+.rank-name  { flex: 1; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-diff  { color: #dc2626; font-weight: 700; font-size: 0.68rem; white-space: nowrap; }
+.rank-games { color: #64748b; font-size: 0.65rem; white-space: nowrap; }
+
+/* Hide score & ranking in exported image */
+body.exporting .score-row,
+body.exporting .revival-ranking { display: none !important; }
+
 /* Connector (simple horizontal line from right edge) */
 .connector {
   position: absolute;

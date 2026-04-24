@@ -1,0 +1,45 @@
+{
+  "activeTab": "doi-nam",
+  "mode": "preview",
+  "events": {
+    "doi-nam": {
+      "players": [
+        "Người 1",  "Người 2",
+        "Người 3",  "Người 4",
+        "Người 5",  "Người 6",
+        "Người 7",  "Người 8",
+        "Người 9",  "Người 10",
+        "Người 11", "Người 12"
+      ],
+      "results": {}
+    },
+    "doi-nu": {
+      "players": [
+        "Người 1",  "Người 2",
+        "Người 3",  "Người 4",
+        "Người 5",  "Người 6",
+        "Người 7",  "Người 8",
+        "Người 9",  "Người 10",
+        "Người 11", "Người 12"
+      ],
+      "results": {}
+    },
+    "doi-nam-nu": {
+      "players": [
+        "Người 1",  "Người 2",
+        "Người 3",  "Người 4",
+        "Người 5",  "Người 6",
+        "Người 7",  "Người 8",
+        "Người 9",  "Người 10",
+        "Người 11", "Người 12",
+        "Người 13", "Người 14",
+        "Người 15", "Người 16",
+        "Người 17", "Người 18",
+        "Người 19", "Người 20",
+        "Người 21", "Người 22",
+        "Người 23", "Người 24"
+      ],
+      "results": {}
+    }
+  }
+}

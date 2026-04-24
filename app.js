@@ -245,6 +245,125 @@ function renderModeButtons() {
     : "Chỉ xem sơ đồ · bật Nhập kết quả để chọn đội thắng.";
 }
 
+// ============================================================
+// SCORE / REVIVAL RANKING HELPERS
+// ============================================================
+
+// games = [{a, b}, ...] where a = top pair score, b = bottom pair score
+function matchWinnerFromScores(games) {
+  if (!games || !games.length) return null;
+  let wa = 0, wb = 0;
+  games.forEach(g => {
+    if (!g || g.a === "" || g.a === null || g.b === "" || g.b === null) return;
+    const a = Number(g.a), b = Number(g.b);
+    if (a > b) wa++; else if (b > a) wb++;
+  });
+  if (wa >= 2) return 0;
+  if (wb >= 2) return 1;
+  return null;
+}
+
+// Returns {diff, games, winTotal, loseTotal} — diff = winner_total - loser_total
+function matchDiffInfo(games) {
+  if (!games || !games.length) return null;
+  let ta = 0, tb = 0, gp = 0;
+  games.forEach(g => {
+    if (!g || g.a === "" || g.a === null || g.b === "" || g.b === null) return;
+    ta += Number(g.a); tb += Number(g.b); gp++;
+  });
+  const w = matchWinnerFromScores(games);
+  if (w === null || gp === 0) return null;
+  const winTotal = w === 0 ? ta : tb;
+  const loseTotal = w === 0 ? tb : ta;
+  return { diff: winTotal - loseTotal, games: gp, winTotal, loseTotal };
+}
+
+function scoreGamesHTML(round, matchIdx, r, isEdit) {
+  if (!isEdit) return "";
+  const scoresKey = round === "v1" ? "v1scores" : "v2scores";
+  const games = r[scoresKey]?.[matchIdx] || [];
+
+  const g0 = games[0] || {}, g1 = games[1] || {};
+  const g0ok = g0.a !== "" && g0.a !== undefined && g0.a !== null && g0.b !== "" && g0.b !== undefined && g0.b !== null;
+  const g1ok = g1.a !== "" && g1.a !== undefined && g1.a !== null && g1.b !== "" && g1.b !== undefined && g1.b !== null;
+  const g0win = g0ok ? (Number(g0.a) > Number(g0.b) ? "a" : "b") : null;
+  const g1win = g1ok ? (Number(g1.a) > Number(g1.b) ? "a" : "b") : null;
+  const need3 = g0ok && g1ok && g0win !== null && g1win !== null && g0win !== g1win;
+  const numRows = need3 ? 3 : 2;
+
+  const rows = [];
+  for (let gi = 0; gi < numRows; gi++) {
+    const gd = games[gi] || {};
+    const av = (gd.a !== undefined && gd.a !== null && gd.a !== "") ? gd.a : "";
+    const bv = (gd.b !== undefined && gd.b !== null && gd.b !== "") ? gd.b : "";
+    let ind = "";
+    if (av !== "" && bv !== "") {
+      const na = Number(av), nb = Number(bv);
+      if (na > nb) ind = `<span class="game-win-ind game-win-a">✓</span>`;
+      else if (nb > na) ind = `<span class="game-win-ind game-win-b">✓</span>`;
+    }
+    rows.push(`<div class="score-game-row">
+      <span class="game-num">Ván ${gi + 1}</span>
+      <input type="number" class="score-input" data-action="game-score" data-round="${round}" data-match="${matchIdx}" data-game="${gi}" data-side="a" value="${av}" placeholder="0" min="0" max="99">
+      <span class="score-sep">–</span>
+      <input type="number" class="score-input" data-action="game-score" data-round="${round}" data-match="${matchIdx}" data-game="${gi}" data-side="b" value="${bv}" placeholder="0" min="0" max="99">
+      ${ind}
+    </div>`);
+  }
+
+  const w = matchWinnerFromScores(games);
+  const info = matchDiffInfo(games);
+  const summary = info
+    ? `<div class="score-summary">${w === 0 ? "Cặp trên" : "Cặp dưới"} thắng · Tổng: ${info.winTotal}–${info.loseTotal} · <span style="color:#dc2626;">Đội thua kém ${info.diff} điểm</span> · ${info.games} ván</div>`
+    : "";
+
+  return `<div class="score-games-wrap">${rows.join("")}${summary}</div>`;
+}
+
+function getRevivalRanking(ev) {
+  const cfg = EVENTS[ev];
+  const isA = cfg.bracket === "A";
+  const losers = isA ? aV1Losers(ev) : bTKLosers(ev);
+  const scoresKey = isA ? "v1scores" : "v2scores";
+  const allScores = state.events[ev].results[scoresKey];
+
+  const candidates = [0, 1, 2].map(i => {
+    const pairIdx = losers[i];
+    if (pairIdx === null || pairIdx === undefined) return { idx: i, pairIdx: null, diff: null, games: null };
+    const info = matchDiffInfo(allScores?.[i]);
+    return { idx: i, pairIdx, diff: info?.diff ?? null, games: info?.games ?? null };
+  });
+
+  const ranked = candidates.filter(c => c.diff !== null && c.pairIdx !== null)
+    .sort((a, b) => {
+      if (a.diff !== b.diff) return a.diff - b.diff;
+      return (b.games || 0) - (a.games || 0);
+    });
+
+  const top = ranked[0];
+  const topTied = top ? ranked.filter(c => c.diff === top.diff && (c.games || 0) === (top.games || 0)) : [];
+  return { ranked, needsRandom: topTied.length > 1, topTied };
+}
+
+function revivalRankingHTML(ev) {
+  const { ranked, needsRandom, topTied } = getRevivalRanking(ev);
+  if (ranked.length === 0) return "";
+  const header = needsRandom
+    ? "🎲 Điểm thua kém bằng nhau → cần bốc thăm"
+    : "Xếp hạng (thua kém ít nhất = ưu tiên hồi sinh):";
+  const rows = ranked.map((c, rank) => {
+    const isTied = needsRandom && topTied.some(t => t.idx === c.idx);
+    const medal = isTied ? "🎲" : rank === 0 ? "★" : `${rank + 1}.`;
+    return `<div class="revival-rank-row ${rank === 0 && !needsRandom ? "top" : ""} ${isTied ? "tie" : ""}">
+      <span class="rank-badge">${medal}</span>
+      <span class="rank-name">${escapeHTML(pairFullName(ev, c.pairIdx))}</span>
+      <span class="rank-diff">thua kém ${c.diff}đ</span>
+      <span class="rank-games">${c.games} ván</span>
+    </div>`;
+  }).join("");
+  return `<div class="revival-ranking"><div class="revival-rank-header">${header}</div>${rows}</div>`;
+}
+
 function renderBracket() {
   const ev = state.activeTab;
   const cfg = EVENTS[ev];
@@ -370,7 +489,10 @@ function revivalSlotHTML(eventKey, losers, clickOpts = {}) {
   const sourceLabel = cfg.bracket === "A" ? "cặp thua V1" : "cặp thua Tứ kết";
 
   if (selectedPair !== null) {
-    // Already chosen → render like a regular (filled) slot, clickable for BK2 pick if opts allow
+    const scoresKey = cfg.bracket === "A" ? "v1scores" : "v2scores";
+    const sc = state.events[ev].results[scoresKey]?.[cur];
+    const info = matchDiffInfo(sc);
+    const diffText = info ? ` · Thua kém ${info.diff} điểm` : "";
     const classes = ["slot-card", "filled"];
     if (clickOpts.winStatus === "winner") classes.push("winner");
     if (clickOpts.winStatus === "loser") classes.push("loser");
@@ -381,21 +503,25 @@ function revivalSlotHTML(eventKey, losers, clickOpts = {}) {
       <div class="${classes.join(' ')}" style="border-color:#f59e0b;background:#fffbeb;" ${action}>
         ${winBadge}
         <div class="slot-title">🎯 ${escapeHTML(pairFullName(ev, selectedPair))}</div>
-        <div class="slot-sub">Cặp hồi sinh · đã chọn</div>
+        <div class="slot-sub">Cặp hồi sinh · đã chọn${escapeHTML(diffText)}</div>
       </div>`;
   }
 
-  // Not yet chosen → dashed amber card, show dropdown in edit mode
+  // Not yet chosen → show ranking + dropdown
+  const rankingHTML = revivalRankingHTML(ev);
   let body;
   if (isEdit) {
     const allReady = losers.every(l => l !== null && l !== undefined);
     if (!allReady) {
       body = `<div class="rev-sub">Cần hoàn tất vòng trước để chọn</div>`;
     } else {
+      const { ranked, needsRandom } = getRevivalRanking(ev);
+      const autoHint = ranked.length > 0 && !needsRandom
+        ? `<div class="rev-sub" style="color:#166534;">★ Gợi ý: ${escapeHTML(pairFullName(ev, ranked[0].pairIdx))}</div>` : "";
       const options = losers.map((pIdx, i) =>
         `<option value="${i}" ${cur === i ? "selected" : ""}>${escapeHTML(pairFullName(ev, pIdx))}</option>`
       ).join("");
-      body = `<select data-action="revival"><option value="">— Chọn 1 cặp —</option>${options}</select>`;
+      body = `${autoHint}<select data-action="revival"><option value="">— Chọn 1 cặp —</option>${options}</select>`;
     }
   } else {
     body = `<div class="rev-sub">BTC chọn 1 ${sourceLabel} theo hiệu số</div>`;
@@ -404,6 +530,7 @@ function revivalSlotHTML(eventKey, losers, clickOpts = {}) {
   return `
     <div class="revival-card">
       <div class="rev-title">🎯 CẶP HỒI SINH</div>
+      ${rankingHTML}
       ${body}
     </div>`;
 }
@@ -429,6 +556,7 @@ function renderBracketA(ev) {
           ${pairCardHTML(ev, top, { winStatus: topStatus, round: "v1", match: m, clickable: isEdit, action: `data-action="pick-v1" data-match="${m}" data-choice="0"` })}
           <div class="vs-label">vs</div>
           ${pairCardHTML(ev, bot, { winStatus: botStatus, round: "v1", match: m, clickable: isEdit, action: `data-action="pick-v1" data-match="${m}" data-choice="1"` })}
+          ${scoreGamesHTML("v1", m, r, isEdit)}
         </div>
       </div>`;
   }).join("");
@@ -567,6 +695,7 @@ function renderBracketB(ev) {
     const label = feeder !== null ? pairFullName(ev, feeder) : fallback;
     const canClick = isEdit && tkF[0] !== null && tkF[1] !== null;
     const connOut = `v3-tk${tkIdx+1}`;
+    const showScores = choice === 1 && canClick;
     return `
       <div class="bg-item" style="grid-column:2; grid-row:${row};" data-conn-id="v2-r${row}" data-conn-out="${connOut}">
         ${slotCardHTML(label, `Tứ kết ${tkIdx+1}`, {
@@ -576,6 +705,7 @@ function renderBracketB(ev) {
           clickable: canClick,
           action: `data-action="pick-v2" data-match="${tkIdx}" data-choice="${choice}"`
         })}
+        ${showScores ? scoreGamesHTML("v2", tkIdx, r, isEdit) : ""}
       </div>`;
   };
 
@@ -806,8 +936,9 @@ function clearPick(ev, round, match) {
 function onBracketChange(e) {
   if (state.mode !== "edit") return;
   const t = e.target;
+  const ev = state.activeTab;
+
   if (t.matches('select[data-action="revival"]')) {
-    const ev = state.activeTab;
     const val = t.value;
     if (val === "") {
       delete state.events[ev].results.revival;
@@ -816,6 +947,38 @@ function onBracketChange(e) {
     } else {
       pickRevival(ev, parseInt(val, 10));
     }
+    renderBracket();
+    return;
+  }
+
+  if (t.dataset.action === "game-score") {
+    const round = t.dataset.round;
+    const matchIdx = parseInt(t.dataset.match, 10);
+    const gameIdx = parseInt(t.dataset.game, 10);
+    const side = t.dataset.side;
+    const scoresKey = round === "v1" ? "v1scores" : "v2scores";
+    const r = state.events[ev].results;
+
+    if (!r[scoresKey]) r[scoresKey] = [];
+    while (r[scoresKey].length <= matchIdx) r[scoresKey].push(null);
+    if (!r[scoresKey][matchIdx]) r[scoresKey][matchIdx] = [];
+    while (r[scoresKey][matchIdx].length <= gameIdx) r[scoresKey][matchIdx].push({ a: "", b: "" });
+    if (!r[scoresKey][matchIdx][gameIdx]) r[scoresKey][matchIdx][gameIdx] = { a: "", b: "" };
+
+    r[scoresKey][matchIdx][gameIdx][side] = t.value === "" ? "" : parseInt(t.value, 10);
+
+    // Auto-determine winner from per-game scores
+    const autoWinner = matchWinnerFromScores(r[scoresKey][matchIdx]);
+    if (autoWinner !== null) {
+      if (round === "v1") {
+        const prev = r.v1?.[matchIdx];
+        if (prev !== autoWinner) pickV1(ev, matchIdx, autoWinner);
+      } else if (round === "v2") {
+        const prev = r.v2?.[matchIdx];
+        if (prev !== autoWinner) pickV2(ev, matchIdx, autoWinner);
+      }
+    }
+
     renderBracket();
   }
 }
